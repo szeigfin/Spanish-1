@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Haz ahora – Saludos, Datos Personales y Ocupaciones</title>
+<style>
+  :root{
+    --bg:#f8fafc; --card:#ffffff; --ink:#1f2937; --muted:#6b7280;
+    --ok:#15803d; --bad:#b91c1c; --brand:#1d4ed8; --accent:#0ea5e9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans";background:var(--bg);color:var(--ink)}
+  header{padding:20px 16px 8px;background:linear-gradient(90deg,#e0f2fe,#eff6ff)}
+  h1{margin:0;font-size:1.5rem}
+  .brand{display:inline-block;background:#1e3a8a;color:#fff;border-radius:999px;padding:2px 10px;font-weight:700;margin-top:6px;font-size:.8rem}
+  .sub{color:var(--muted);margin-top:6px}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 16px 40px}
+  .bar{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0}
+  .bar .line{flex:1 1 320px}
+  .card.stage{background:var(--card);border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin:16px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .title{display:flex;align-items:center;gap:10px;margin:0 0 8px}
+  .title h2{margin:0;font-size:1.1rem}
+  .tiny{color:var(--muted);font-size:.92rem}
+  .controls{display:flex;gap:8px;align-items:center;margin-top:10px}
+  button{background:var(--brand);color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+  button.ghost{background:#ecf2ff;color:#173a8a}
+  .score{margin-left:auto;font-weight:700}
+  .ok{color:var(--ok)} .bad{color:var(--bad)}
+  .kbd{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;background:#eef2ff;border:1px solid #dbe2ff;padding:2px 6px;border-radius:6px}
+  /* Sort (Stage 1) */
+  .grid{display:grid;gap:12px}
+  .cols-2{grid-template-columns:1fr 1fr}
+  .bin{border:2px dashed #c7d2fe;border-radius:12px;padding:10px;min-height:120px;background:#f8fafc}
+  .bin.active{border-color:var(--accent)}
+  .pill{display:inline-block;margin:6px 6px 0 0;padding:8px 12px;border:1px solid #d1d5db;border-radius:999px;background:#fff;cursor:grab;user-select:none}
+  .pill:active{cursor:grabbing}
+  /* Conjugation drill */
+  .table{display:grid;grid-template-columns: 1fr 2fr;gap:10px}
+  .cell{border:1px solid #e5e7eb;border-radius:10px;padding:10px;background:#fff}
+  .drop{min-height:44px;border:2px dashed #d1d5db;border-radius:10px;padding:8px;display:flex;gap:8px;flex-wrap:wrap;background:#fff}
+  .drop.active{border-color:var(--accent)}
+  /* Cloze */
+  .item{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff}
+  .q{margin-bottom:8px}
+  input[type="text"]{width:100%;padding:10px 12px;border:2px solid #e5e7eb;border-radius:10px;font-size:1rem}
+  input[type="text"]:focus{outline:none;border-color:var(--accent);background:#f0f9ff}
+  /* Sentence builder */
+  .bank{min-height:52px;padding:10px;border:2px dashed #c7d2fe;border-radius:12px;background:#f8fafc;display:flex;gap:8px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">ProfeVT</div>
+  <h1>Haz ahora – Saludos, Datos Personales y Ocupaciones</h1>
+  <div class="sub">Acentos obligatorios para respuestas correctas (p. ej., <span class="kbd">años</span>, <span class="kbd">teléfono</span>, <span class="kbd">electrónico</span>).</div>
+  <div class="bar">
+    <div class="line">Nombre: ____________________________</div>
+    <div class="line">Fecha: ____________________________</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- STAGE 1: SORT -->
+  <section class="card stage" id="stage1">
+    <div class="title"><h2>Etapa 1 — Clasifica: saludos/presentaciones vs. datos personales</h2></div>
+    <div class="tiny">Arrastra cada tarjeta al lugar correcto.</div>
+    <div class="grid cols-2" style="margin-top:10px">
+      <div>
+        <strong>Banco</strong>
+        <div id="s1-bank" class="bin"></div>
+      </div>
+      <div>
+        <div class="grid cols-2">
+          <div class="cell">
+            <strong>Saludos/Presentaciones</strong>
+            <div id="s1-saludos" class="bin"></div>
+          </div>
+          <div class="cell">
+            <strong>Datos personales / Ocupación</strong>
+            <div id="s1-datos" class="bin"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <button data-action="check" data-for="s1">Calificar</button>
+      <button class="ghost" data-action="reset" data-for="s1">Reiniciar</button>
+      <div class="score" id="score-s1">Puntuación: 0/0</div>
+    </div>
+    <div id="fb-s1"></div>
+  </section>
+
+  <!-- STAGE 2: CONJUGATION DRILL (ser, tener, llamarse) -->
+  <section class="card stage" id="stage2">
+    <div class="title"><h2>Etapa 2 — Conjuga: <em>ser</em>, <em>tener</em>, <em>llamarse</em></h2></div>
+    <div class="tiny">Arrastra la forma correcta a cada sujeto. (Presente del indicativo; acentos exactos)</div>
+    <div class="grid cols-2" style="margin-top:10px">
+      <div class="cell">
+        <strong>Formas disponibles</strong>
+        <div id="s2-bank" class="bin"></div>
+      </div>
+      <div class="cell">
+        <div class="table" id="s2-table"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button data-action="check" data-for="s2">Calificar</button>
+      <button class="ghost" data-action="reset" data-for="s2">Reiniciar</button>
+      <div class="score" id="score-s2">Puntuación: 0/0</div>
+    </div>
+    <div id="fb-s2"></div>
+  </section>
+
+  <!-- STAGE 3: CLOZE (typed) -->
+  <section class="card stage" id="stage3">
+    <div class="title"><h2>Etapa 3 — Completa las oraciones (con acentos)</h2></div>
+    <div class="tiny">Escribe la palabra o forma correcta. Ejemplos de preguntas clave: ¿Cómo te llamas?, ¿Cuántos años tienes?, ¿De dónde eres?, ¿Cuál es tu ocupación?, ¿Cuál es tu número de teléfono?, ¿Cuál es tu correo electrónico?, ¿Cuándo es tu cumpleaños?</div>
+    <div class="grid cols-2" id="s3-list" style="margin-top:10px"></div>
+    <div class="controls">
+      <button data-action="check" data-for="s3">Calificar</button>
+      <button class="ghost" data-action="reset" data-for="s3">Reiniciar</button>
+      <div class="score" id="score-s3">Puntuación: 0/0</div>
+    </div>
+    <div id="fb-s3"></div>
+  </section>
+
+  <!-- STAGE 4: SENTENCE BUILDER -->
+  <section class="card stage" id="stage4">
+    <div class="title"><h2>Etapa 4 — Construye la pregunta (arrastrar y soltar)</h2></div>
+    <div class="tiny">Ordena las tarjetas para formar la pregunta correcta. (Usa mayúsculas, signos de interrogación y acentos).</div>
+    <div id="s4-items" class="grid cols-2" style="margin-top:10px"></div>
+    <div class="controls">
+      <button data-action="check" data-for="s4">Calificar</button>
+      <button class="ghost" data-action="reset" data-for="s4">Reiniciar</button>
+      <div class="score" id="score-s4">Puntuación: 0/0</div>
+    </div>
+    <div id="fb-s4"></div>
+  </section>
+
+</div>
+
+<script>
+// =========================
+// Accent-sensitive compare
+// =========================
+function eq(a,b){ return String(a).normalize('NFC') === String(b).normalize('NFC'); }
+
+// =========================
+// Teacher mode (?teacher=1)
+// =========================
+const TEACHER = new URLSearchParams(location.search).get('teacher') === '1';
+
+// =========================
+// DATA (in-bounds vocab & tasks)
+// =========================
+
+// Stage 1: sort
+const S1_ITEMS = [
+  { text:"Hola, ¿cómo estás?", bin:"saludos" },
+  { text:"Mucho gusto / Encantado(a).", bin:"saludos" },
+  { text:"Me llamo Zoe.", bin:"saludos" },
+  { text:"¿Cómo te llamas?", bin:"saludos" },
+  { text:"¿Cuántos años tienes?", bin:"datos" },
+  { text:"Tengo quince años.", bin:"datos" },
+  { text:"¿De dónde eres?", bin:"datos" },
+  { text:"Soy de California.", bin:"datos" },
+  { text:"¿Cuál es tu ocupación?", bin:"datos" },
+  { text:"Soy estudiante.", bin:"datos" },
+  { text:"¿Cuál es tu número de teléfono?", bin:"datos" },
+  { text:"Es el 555 67 89.", bin:"datos" },
+  { text:"¿Cuál es tu correo electrónico?", bin:"datos" },
+  { text:"ZF15@mail.difu", bin:"datos" },
+  { text:"¿Cuándo es tu cumpleaños?", bin:"datos" },
+  { text:"Es el 15 de agosto.", bin:"datos" }
+];
+
+// Stage 2: conjugation drill (ser, tener, llamarse)
+const S2_SUBJECTS = ["yo","tú","él/ella","nosotros","vosotros","ellos/ellas"];
+const S2_BANK = [
+  // ser
+  "soy","eres","es","somos","sois","son",
+  // tener
+  "tengo","tienes","tiene","tenemos","tenéis","tienen",
+  // llamarse
+  "me llamo","te llamas","se llama","nos llamamos","os llamáis","se llaman"
+];
+const S2_ANSWERS = {
+  "yo": ["soy","tengo","me llamo"],
+  "tú": ["eres","tienes","te llamas"],
+  "él/ella": ["es","tiene","se llama"],
+  "nosotros": ["somos","tenemos","nos llamamos"],
+  "vosotros": ["sois","tenéis","os llamáis"],
+  "ellos/ellas": ["son","tienen","se llaman"]
+};
+
+// Stage 3: cloze (from your prompt set)
+const S3_ITEMS = [
+  { q:"a) ______ te llamas? — Me llamo Zoe.", a:"¿Cómo" },
+  { q:"b) ______ años tienes? — Tengo quince años.", a:"¿Cuántos" },
+  { q:"c) ______ de dónde eres? — Soy de California.", a:"¿" }, // trick: add opening mark
+  { q:"d) ______ es tu número de teléfono? — Es el 555 67 89.", a:"¿Cuál" },
+  { q:"e) ______ es tu cumpleaños? — El 15 de agosto.", a:"¿Cuándo" },
+  { q:"f) ______ es tu ocupación? — Soy estudiante.", a:"¿Cuál" },
+  { q:"g) ______ es tu correo electrónico? — ZF15@mail.difu", a:"¿Cuál" },
+  // Extra practice items with vocab (ser/soy/eres + occupations)
+  { q:"h) Él ______ (ser) fotógrafo.", a:"es" },
+  { q:"i) Nosotros ______ (ser) estudiantes.", a:"somos" },
+  { q:"j) Ellos ______ (tener) dieciséis años.", a:"tienen" },
+  { q:"k) Yo ______ (tener) catorce años.", a:"tengo" },
+  { q:"l) Ella ______ (llamarse) Ana.", a:"se llama" },
+  { q:"m) Nosotros ______ (llamarse) Rivera.", a:"nos llamamos" },
+  { q:"n) ¿De ______ eres? (lugar)", a:"dónde" },
+  { q:"o) ¿Cuál es tu ______ electrónico?", a:"correo" },
+  { q:"p) ¿Cuál es tu número de ______?", a:"teléfono" },
+  { q:"q) ¿Cuándo es tu ______?", a:"cumpleaños" },
+  { q:"r) Señorita Rivera, ______.", a:"encantada" },
+  { q:"s) Señor Rodríguez, ______.", a:"mucho gusto" },
+  { q:"t) Completa: Soy ______ (ocupación) — por ejemplo: estudiante.", a:"estudiante" }
+];
+
+// Stage 4: sentence builder (questions)
+const S4_ITEMS = [
+  { ans:"¿Cómo te llamas?", bank:["¿Cómo","te","llamas","?"] },
+  { ans:"¿Cuántos años tienes?", bank:["¿Cuántos","años","tienes","?"] },
+  { ans:"¿De dónde eres?", bank:["¿De","dónde","eres","?"] },
+  { ans:"¿Cuál es tu ocupación?", bank:["¿Cuál","es","tu","ocupación","?"] },
+  { ans:"¿Cuál es tu número de teléfono?", bank:["¿Cuál","es","tu","número","de","teléfono","?"] },
+  { ans:"¿Cuál es tu correo electrónico?", bank:["¿Cuál","es","tu","correo","electrónico","?"] },
+  { ans:"¿Cuándo es tu cumpleaños?", bank:["¿Cuándo","es","tu","cumpleaños","?"] }
+];
+
+// =========================
+// Helpers
+// =========================
+function shuffle(a){ return a.map(x=>[Math.random(),x]).sort((m,n)=>m[0]-n[0]).map(x=>x[1]); }
+
+function makePill(text){
+  const el=document.createElement('span');
+  el.className='pill'; el.draggable=true; el.textContent=text;
+  el.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain', text));
+  return el;
+}
+function makeBin(id){
+  const el=document.getElementById(id);
+  el.addEventListener('dragover', e=>{e.preventDefault(); el.classList.add('active');});
+  el.addEventListener('dragleave', ()=> el.classList.remove('active'));
+  el.addEventListener('drop', e=>{
+    e.preventDefault(); el.classList.remove('active');
+    const text=e.dataTransfer.getData('text/plain');
+    el.appendChild(makePill(text));
+  });
+  return el;
+}
+
+// =========================
+// Stage 1
+// =========================
+function renderS1(){
+  const bank=document.getElementById('s1-bank');
+  bank.innerHTML='';
+  shuffle(S1_ITEMS).forEach(it=> bank.appendChild(makePill(it.text)));
+  makeBin('s1-bank'); makeBin('s1-saludos'); makeBin('s1-datos');
+  document.getElementById('score-s1').textContent = `Puntuación: 0/${S1_ITEMS.length}`;
+  document.getElementById('fb-s1').textContent = '';
+}
+function gradeS1(){
+  let correct=0; const total=S1_ITEMS.length;
+  const sal=document.getElementById('s1-saludos').querySelectorAll('.pill');
+  const dat=document.getElementById('s1-datos').querySelectorAll('.pill');
+  sal.forEach(p=>{ if(S1_ITEMS.find(x=>eq(x.text,p.textContent)&&x.bin==='saludos')) correct++; });
+  dat.forEach(p=>{ if(S1_ITEMS.find(x=>eq(x.text,p.textContent)&&x.bin==='datos')) correct++; });
+  document.getElementById('score-s1').textContent = `Puntuación: ${correct}/${total}`;
+  document.getElementById('fb-s1').innerHTML = (correct===total)?'<span class="ok">¡Excelente!</span>':'<span class="bad">Revisa algunas tarjetas.</span>';
+  if(TEACHER){
+    const key = S1_ITEMS.map(x=>`${x.text} → ${x.bin}`).join('<br>');
+    document.getElementById('fb-s1').innerHTML += `<div class="tiny" style="margin-top:6px">${key}</div>`;
+  }
+}
+
+// =========================
+// Stage 2
+// =========================
+function renderS2(){
+  const bank=document.getElementById('s2-bank'); bank.innerHTML='';
+  shuffle(S2_BANK).forEach(f=> bank.appendChild(makePill(f)));
+  makeBin('s2-bank');
+  const table=document.getElementById('s2-table'); table.innerHTML='';
+  S2_SUBJECTS.forEach(sub=>{
+    const label=document.createElement('div'); label.className='cell'; label.textContent=sub;
+    const drop=document.createElement('div'); drop.className='drop'; drop.dataset.sub=sub;
+    drop.addEventListener('dragover', e=>{e.preventDefault(); drop.classList.add('active');});
+    drop.addEventListener('dragleave', ()=> drop.classList.remove('active'));
+    drop.addEventListener('drop', e=>{
+      e.preventDefault(); drop.classList.remove('active');
+      const text=e.dataTransfer.getData('text/plain');
+      drop.appendChild(makePill(text));
+    });
+    table.appendChild(label); table.appendChild(drop);
+  });
+  document.getElementById('score-s2').textContent = 'Puntuación: 0/18';
+  document.getElementById('fb-s2').textContent = '';
+}
+function gradeS2(){
+  let correct=0; const total=18;
+  document.querySelectorAll('#s2-table .drop').forEach(d=>{
+    const sub=d.dataset.sub; const pills=[...d.querySelectorAll('.pill')].map(p=>p.textContent);
+    const need=S2_ANSWERS[sub];
+    need.forEach(form=>{ if(pills.find(p=>eq(p,form))) correct++; });
+  });
+  document.getElementById('score-s2').textContent = `Puntuación: ${correct}/${total}`;
+  document.getElementById('fb-s2').innerHTML = (correct===total)?'<span class="ok">¡Perfecto!</span>':'<span class="bad">Faltan o sobran formas.</span>';
+  if(TEACHER){
+    const key = Object.entries(S2_ANSWERS).map(([k,v])=>`${k}: ${v.join(', ')}`).join('<br>');
+    document.getElementById('fb-s2').innerHTML += `<div class="tiny" style="margin-top:6px">${key}</div>`;
+  }
+}
+
+// =========================
+// Stage 3
+// =========================
+function renderS3(){
+  const host=document.getElementById('s3-list'); host.innerHTML='';
+  S3_ITEMS.forEach((it,i)=>{
+    const card=document.createElement('div'); card.className='item';
+    const q=document.createElement('div'); q.className='q'; q.textContent = `${i+1}. ${it.q}`;
+    const inp=document.createElement('input'); inp.type='text'; inp.id=`s3-${i}`; inp.placeholder='Escribe aquí (acentos exactos)';
+    if(TEACHER){ const key=document.createElement('div'); key.className='tiny'; key.textContent='Resp.: '+it.a; card.appendChild(key); }
+    card.appendChild(q); card.appendChild(inp); host.appendChild(card);
+  });
+  document.getElementById('score-s3').textContent = `Puntuación: 0/${S3_ITEMS.length}`;
+  document.getElementById('fb-s3').textContent = '';
+}
+function gradeS3(){
+  let correct=0, total=S3_ITEMS.length;
+  S3_ITEMS.forEach((it,i)=>{
+    const val=(document.getElementById(`s3-${i}`).value||'').trim();
+    if(eq(val, it.a)) correct++;
+  });
+  document.getElementById('score-s3').textContent = `Puntuación: ${correct}/${total}`;
+  document.getElementById('fb-s3').innerHTML = (correct===total)?'<span class="ok">¡Excelente!</span>':'<span class="bad">Revisa acentos y ortografía.</span>';
+}
+
+// =========================
+// Stage 4
+// =========================
+function renderS4(){
+  const host=document.getElementById('s4-items'); host.innerHTML='';
+  S4_ITEMS.forEach((it,idx)=>{
+    const card=document.createElement('div'); card.className='item';
+    const label=document.createElement('div'); label.innerHTML = `<strong>${idx+1}.</strong> Ordena para formar la pregunta.`;
+    const bank=document.createElement('div'); bank.className='bank';
+    const drop=document.createElement('div'); drop.className='drop'; drop.id=`s4-drop-${idx}`;
+    shuffle(it.bank).forEach(tok=> bank.appendChild(makePill(tok)));
+    drop.addEventListener('dragover', e=>{e.preventDefault(); drop.classList.add('active');});
+    drop.addEventListener('dragleave', ()=> drop.classList.remove('active'));
+    drop.addEventListener('drop', e=>{ e.preventDefault(); drop.classList.remove('active'); const t=e.dataTransfer.getData('text/plain'); drop.appendChild(makePill(t)); });
+    if(TEACHER){ const key=document.createElement('div'); key.className='tiny'; key.textContent='Resp.: '+it.ans; card.appendChild(key); }
+    card.appendChild(label); card.appendChild(bank); card.appendChild(drop); host.appendChild(card);
+  });
+  document.getElementById('score-s4').textContent = `Puntuación: 0/${S4_ITEMS.length}`;
+  document.getElementById('fb-s4').textContent = '';
+}
+function gradeS4(){
+  let correct=0, total=S4_ITEMS.length;
+  S4_ITEMS.forEach((it,idx)=>{
+    const built=[...document.querySelectorAll(`#s4-drop-${idx} .pill`)].map(p=>p.textContent).join(' ').trim();
+    if(eq(built, it.ans)) correct++;
+  });
+  document.getElementById('score-s4').textContent = `Puntuación: ${correct}/${total}`;
+  document.getElementById('fb-s4').innerHTML = (correct===total)?'<span class="ok">¡Muy bien!</span>':'<span class="bad">Atención al orden, signos y acentos.</span>';
+}
+
+// =========================
+// Wiring
+// =========================
+function reset(which){
+  if(which==='s1') renderS1();
+  if(which==='s2') renderS2();
+  if(which==='s3') renderS3();
+  if(which==='s4') renderS4();
+}
+function wire(){
+  document.querySelectorAll('button[data-action="check"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const w=btn.dataset.for;
+      if(w==='s1') gradeS1();
+      if(w==='s2') gradeS2();
+      if(w==='s3') gradeS3();
+      if(w==='s4') gradeS4();
+    });
+  });
+  document.querySelectorAll('button[data-action="reset"]').forEach(btn=>{
+    btn.addEventListener('click', ()=> reset(btn.dataset.for));
+  });
+}
+function init(){ reset('s1'); reset('s2'); reset('s3'); reset('s4'); wire(); }
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
