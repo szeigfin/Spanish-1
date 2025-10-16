@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Haz ahora – Números de teléfono</title>
+<style>
+  :root { --bg:#f8fafc; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --ok:#15803d; --bad:#b91c1c; --brand:#1d4ed8; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans"; background:var(--bg); color:var(--ink); }
+  header { text-align:center; padding:20px 16px 8px; background: linear-gradient(90deg,#e0f2fe,#eff6ff); }
+  h1 { margin:0; font-size:1.6rem; }
+  .sub { color:var(--muted); margin:4px 0 10px; }
+  .wrap { max-width:980px; margin:0 auto; padding:0 16px 40px; }
+  .card { background:var(--card); border:1px solid #e5e7eb; border-radius:14px; padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.05); margin:16px 0; }
+  .title { display:flex; align-items:center; gap:8px; }
+  .title h2 { margin:0; font-size:1.1rem; }
+  .tiny { color:var(--muted); font-size:.92rem; }
+  .controls { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+  button { background:var(--brand); color:#fff; border:none; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; }
+  button.ghost { background:#ecf2ff; color:#173a8a; }
+  .score { margin-left:auto; font-weight:700; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  .bank, .drop { min-height:56px; padding:10px; border:2px dashed #c7d2fe; border-radius:12px; background:#f8fafc; display:flex; gap:8px; flex-wrap:wrap; }
+  .drop { border-color:#d1d5db; background:#fff; }
+  .drop.active { border-color:#1d4ed8; }
+  .pill { display:inline-block; padding:8px 12px; border:1px solid #d1d5db; border-radius:999px; background:#fff; cursor:grab; user-select:none; }
+  .row { display:flex; gap:16px; flex-wrap:wrap; }
+  .col { flex:1 1 320px; }
+  .item { border:1px solid #e5e7eb; border-radius:12px; padding:12px; background:#fff; margin-top:10px; }
+  .q { margin-bottom:8px; }
+  input[type="text"] { width:100%; padding:10px 12px; border:2px solid #e5e7eb; border-radius:10px; font-size:1rem; }
+  input[type="text"]:focus { outline:none; border-color:#1d4ed8; background:#f0f9ff; }
+  .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; background:#eef2ff; border:1px solid #dbe2ff; padding:2px 6px; border-radius:6px; }
+  .phone { font-weight:800; letter-spacing:1px; }
+  .hint { font-size:.9rem; color:#64748b; }
+  .mic { background:#10b981; }
+  .mic.stop { background:#ef4444; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Haz ahora – Números de teléfono</h1>
+  <div class="sub">Práctica enfocada en <strong>decir y escribir</strong> números de teléfono. (Sin usar 0/cero.)</div>
+  <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
+    <div>Nombre: ____________________________</div>
+    <div>Fecha: ____________________________</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- A) Construye el número -->
+  <section class="card" id="build">
+    <div class="title"><h2>Parte A — Construye el número</h2></div>
+    <div class="tiny">Arrastra palabras al recuadro para formar el número. Formato meta: <span class="kbd">555 67 89</span> (3–2–2).</div>
+    <div class="item">
+      <div class="q">Meta (número): <span id="build-target" class="phone"></span></div>
+      <div class="row">
+        <div class="col">
+          <strong>Banco de palabras</strong>
+          <div id="build-bank" class="bank"></div>
+        </div>
+        <div class="col">
+          <strong>Ordena aquí</strong>
+          <div id="build-drop" class="drop"></div>
+          <div class="hint">Di cada dígito en español (ej.: 5 → <em>cinco</em>).</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button data-action="check" data-for="build">Comprobar</button>
+        <button class="ghost" data-action="reset" data-for="build">Reiniciar</button>
+        <div class="score" id="score-build">Puntuación: 0/0</div>
+      </div>
+      <div id="fb-build"></div>
+    </div>
+  </section>
+
+  <!-- B) Escribe en palabras -->
+  <section class="card" id="write">
+    <div class="title"><h2>Parte B — Escribe en palabras</h2></div>
+    <div class="tiny">Escribe los dígitos en palabras separadas por espacios (ej.: <span class="kbd">cinco cinco cinco seis siete ocho nueve</span>).</div>
+    <div id="write-items"></div>
+    <div class="controls">
+      <button data-action="check" data-for="write">Comprobar</button>
+      <button class="ghost" data-action="reset" data-for="write">Reiniciar</button>
+      <div class="score" id="score-write">Puntuación: 0/0</div>
+    </div>
+    <div id="fb-write"></div>
+  </section>
+
+  <!-- C) Di el número (mic) -->
+  <section class="card" id="speak">
+    <div class="title"><h2>Parte C — Di el número</h2></div>
+    <div class="tiny">Pulsa <strong>Hablar</strong> y di los dígitos en español. El navegador transcribe y compara. <em>Consejo:</em> marca el micrófono en <strong>español</strong> para mejor precisión.</div>
+    <div class="item">
+      <div class="q">Meta (número): <span id="speak-target" class="phone"></span></div>
+      <div class="row">
+        <div class="col">
+          <button id="micBtn" class="mic">🎤 Hablar</button>
+          <div id="transcript" class="hint" style="margin-top:8px;">Transcripción: <em>(vacío)</em></div>
+        </div>
+        <div class="col">
+          <div id="speak-feedback" class="hint">Estado: <em>sin comenzar</em></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button data-action="check" data-for="speak">Comprobar</button>
+        <button class="ghost" data-action="reset" data-for="speak">Reiniciar</button>
+        <div class="score" id="score-speak">Puntuación: 0/0</div>
+      </div>
+      <div id="fb-speak"></div>
+      <div class="tiny">Compatibilidad: Chrome/Edge (Web Speech API). Si no aparece la opción de micrófono, esta parte no está disponible en tu dispositivo.</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ===== Utilities (accent-sensitive) =====
+function eqNFC(a,b){ return String(a).normalize('NFC') === String(b).normalize('NFC'); }
+function shuffle(arr){ return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]); }
+
+// Digits 1-9 only to match in-bounds list
+const DIGIT_WORD = {1:"uno",2:"dos",3:"tres",4:"cuatro",5:"cinco",6:"seis",7:"siete",8:"ocho",9:"nueve"};
+const WORD_DIGIT = Object.fromEntries(Object.entries(DIGIT_WORD).map(([k,v])=>[v,Number(k)]));
+
+// Generate a random 7-digit number with digits 1-9, show as 3-2-2 (e.g., 555 67 89)
+function makePhone(){
+  let seq = [];
+  for(let i=0;i<7;i++){ seq.push(String(1 + Math.floor(Math.random()*9))); }
+  const digits = seq.join('');
+  const display = `${digits.slice(0,3)} ${digits.slice(3,5)} ${digits.slice(5)}`;
+  const words = seq.map(d => DIGIT_WORD[Number(d)]).join(' ');
+  return {digits, display, words, seq};
+}
+
+// Global items
+let A_TARGET, C_TARGET; // build target and speak target
+let WRITE_DATA = [];    // list of {display, words}
+
+// ===== A) Construye el número =====
+function makePill(text){
+  const el = document.createElement('span');
+  el.className = 'pill';
+  el.draggable = true;
+  el.textContent = text;
+  el.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', text));
+  return el;
+}
+function makeDropZone(el){
+  el.addEventListener('dragover', e=>{ e.preventDefault(); el.classList.add('active'); });
+  el.addEventListener('dragleave', ()=> el.classList.remove('active'));
+  el.addEventListener('drop', e=>{
+    e.preventDefault(); el.classList.remove('active');
+    const t = e.dataTransfer.getData('text/plain');
+    el.appendChild(makePill(t));
+  });
+}
+function renderBuild(){
+  const tgt = makePhone();
+  A_TARGET = tgt;
+  document.getElementById('build-target').textContent = tgt.display;
+  const bank = document.getElementById('build-bank'); bank.innerHTML='';
+  const drop = document.getElementById('build-drop'); drop.innerHTML='';
+  // Add correct words + distractors
+  const needed = tgt.seq.map(d=> DIGIT_WORD[Number(d)]);
+  const distractors = shuffle(Object.values(DIGIT_WORD)).slice(0,5);
+  shuffle([...needed, ...distractors]).forEach(w=> bank.appendChild(makePill(w)));
+  makeDropZone(bank); makeDropZone(drop);
+  document.getElementById('score-build').textContent = `Puntuación: 0/${tgt.seq.length}`;
+  document.getElementById('fb-build').textContent = '';
+}
+function gradeBuild(){
+  const pills = [...document.querySelectorAll('#build-drop .pill')].map(p=>p.textContent);
+  let correct = 0;
+  A_TARGET.seq.forEach((d, i)=>{
+    if(eqNFC(pills[i]||'', DIGIT_WORD[Number(d)])) correct++;
+  });
+  document.getElementById('score-build').textContent = `Puntuación: ${correct}/${A_TARGET.seq.length}`;
+  document.getElementById('fb-build').innerHTML = (correct===A_TARGET.seq.length)
+    ? '<span class="ok">¡Excelente! Coincide con la meta.</span>'
+    : '<span class="bad">Revisa el orden y las palabras.</span>';
+}
+
+// ===== B) Escribe en palabras =====
+function renderWrite(){
+  const host = document.getElementById('write-items'); host.innerHTML='';
+  WRITE_DATA = [makePhone(), makePhone(), makePhone()];
+  WRITE_DATA.forEach((p, idx)=>{
+    const card = document.createElement('div'); card.className='item';
+    const q = document.createElement('div'); q.className='q';
+    q.innerHTML = `<strong>${idx+1}.</strong> Número: <span class="phone">${p.display}</span>`;
+    const inp = document.createElement('input'); inp.type='text'; inp.id = `w-${idx}`; inp.placeholder='cinco cinco cinco seis siete ocho nueve';
+    card.appendChild(q); card.appendChild(inp); host.appendChild(card);
+  });
+  document.getElementById('score-write').textContent = `Puntuación: 0/${WRITE_DATA.length}`;
+  document.getElementById('fb-write').textContent = '';
+}
+function gradeWrite(){
+  let correct = 0;
+  WRITE_DATA.forEach((p, idx)=>{
+    const val = (document.getElementById(`w-${idx}`).value || '').trim().toLowerCase().normalize('NFC').replace(/\s+/g,' ');
+    const key = p.words.toLowerCase().normalize('NFC');
+    if(eqNFC(val, key)) correct++;
+  });
+  document.getElementById('score-write').textContent = `Puntuación: ${correct}/${WRITE_DATA.length}`;
+  document.getElementById('fb-write').innerHTML = (correct===WRITE_DATA.length)
+    ? '<span class="ok">¡Muy bien! Palabras correctas.</span>'
+    : '<span class="bad">Revisa la ortografía y el orden.</span>';
+}
+
+// ===== C) Di el número (mic) =====
+let recog = null, listening = false, transcriptFinal = '';
+function renderSpeak(){
+  C_TARGET = makePhone();
+  document.getElementById('speak-target').textContent = C_TARGET.display;
+  transcriptFinal = '';
+  document.getElementById('transcript').innerHTML = 'Transcripción: <em>(vacío)</em>';
+  document.getElementById('speak-feedback').innerHTML = 'Estado: <em>sin comenzar</em>';
+  document.getElementById('score-speak').textContent = 'Puntuación: 0/1';
+  document.getElementById('fb-speak').textContent = '';
+
+  // Setup speech recognition if available
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(SR){
+    recog = new SR();
+    recog.lang = 'es-ES';
+    recog.interimResults = true;
+    recog.onstart = ()=> { listening = true; document.getElementById('speak-feedback').textContent = 'Estado: escuchando…'; };
+    recog.onresult = (e)=> {
+      let finalTxt = '';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        finalTxt += e.results[i][0].transcript + ' ';
+        if(e.results[i].isFinal) transcriptFinal = finalTxt.trim();
+      }
+      document.getElementById('transcript').textContent = 'Transcripción: ' + finalTxt.trim();
+    };
+    recog.onerror = (e)=> { document.getElementById('speak-feedback').textContent = 'Error de micrófono/transcripción.'; };
+    recog.onend = ()=> { listening = false; document.getElementById('speak-feedback').textContent = 'Estado: detenido.'; };
+  } else {
+    document.getElementById('speak-feedback').innerHTML = '<span class="bad">Micrófono no compatible en este navegador.</span>';
+  }
+
+  const btn = document.getElementById('micBtn');
+  btn.classList.remove('stop');
+  btn.textContent = '🎤 Hablar';
+  btn.onclick = ()=>{
+    if(!recog){ alert('El micrófono no es compatible en este navegador.'); return; }
+    if(!listening){ recog.start(); listening = true; btn.classList.add('stop'); btn.textContent = '■ Detener'; }
+    else { recog.stop(); btn.classList.remove('stop'); btn.textContent = '🎤 Hablar'; }
+  };
+}
+function normalizeSpeech(txt){
+  // Keep only Spanish words for digits 1-9; remove punctuation; lowercase; NFC
+  return (txt||'').toLowerCase().normalize('NFC').replace(/[^\p{L}\s]/gu,' ').replace(/\s+/g,' ').trim();
+}
+function wordsFromSeq(seq){ return seq.map(d=> DIGIT_WORD[Number(d)]).join(' '); }
+function gradeSpeak(){
+  const said = normalizeSpeech(transcriptFinal);
+  const key = wordsFromSeq(C_TARGET.seq);
+  const ok = eqNFC(said, key);
+  document.getElementById('score-speak').textContent = `Puntuación: ${ok?1:0}/1`;
+  document.getElementById('fb-speak').innerHTML = ok
+    ? '<span class="ok">¡Excelente! Coincide con la secuencia esperada.</span>'
+    : `<span class="bad">No coincide. Clave esperada: <span class="kbd">${key}</span>.</span>`;
+}
+
+// ===== Wiring & init =====
+function reset(which){
+  if(which==='build') renderBuild();
+  if(which==='write') renderWrite();
+  if(which==='speak') renderSpeak();
+}
+function wire(){
+  document.querySelectorAll('button[data-action="check"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const t = btn.dataset.for;
+      if(t==='build') gradeBuild();
+      if(t==='write') gradeWrite();
+      if(t==='speak') gradeSpeak();
+    });
+  });
+  document.querySelectorAll('button[data-action="reset"]').forEach(btn=> btn.addEventListener('click', ()=> reset(btn.dataset.for)));
+}
+function init(){ reset('build'); reset('write'); reset('speak'); wire(); }
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
