@@ -1,0 +1,70 @@
+:root{
+  --orange:#FFAB00;
+  --harley:#DD2E18;
+  --mint:#C8FCEA;
+  --teal:#1C6E65;
+  --cream:#FFF9EE;
+  --ink:#0f2220;
+  --muted:#4a6a66;
+  --border:rgba(28,110,101,.18);
+  --radius:22px; --radius-lg:28px;
+  --shadow:0 14px 40px rgba(28,110,101,.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:
+  radial-gradient(1100px 500px at 85% -10%, rgba(255,171,0,.10), transparent 70%),
+  radial-gradient(900px 400px at 10% -10%, rgba(221,46,24,.08), transparent 65%),
+  var(--cream);
+color:var(--ink);font-family:"Poppins",system-ui,Arial}
+.container{max-width:1200px;margin:22px auto 110px;padding:0 18px;position:relative}
+
+.avatar-float{position:relative;height:0}
+.logo{position:absolute;left:0;top:0;transform:translateY(-6px);
+  width:84px;height:84px;border-radius:22px;background:#fff;border:2px solid var(--border);
+  display:grid;place-items:center;overflow:hidden;box-shadow:var(--shadow)}
+.logo img{width:100%;height:100%;object-fit:cover}
+
+.header-band{margin-left:100px;background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);padding:18px 18px 14px}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.title-row{display:flex;align-items:center;gap:10px}
+h1{margin:0;font-family:"Montserrat Alternates";font-weight:900;font-size:clamp(24px,4.5vw,36px)}
+.tag{display:inline-block;background:linear-gradient(90deg,var(--orange),var(--mint));color:#143f3a;
+  padding:6px 14px;border-radius:999px;font-weight:900;box-shadow:0 8px 22px rgba(28,110,101,.18)}
+
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.col{flex:1;min-width:230px}
+.input{display:flex;gap:10px;align-items:center;background:#fff;border:2px solid var(--border);border-radius:14px;padding:10px 12px}
+.input label{min-width:96px;color:#2e5c57;font-size:12px;font-weight:800}
+.input input, select{flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--border);background:#fefdf8;color:#183b36;outline:none}
+
+.panel{width:100%;background:#fff;border:2px solid var(--border);border-radius:16px;padding:10px;margin-top:14px}
+.panel summary{cursor:pointer;font-weight:900;font-family:"Montserrat Alternates"}
+.note{color:var(--muted);font-size:12px}
+
+/* Activity cards */
+.activity{margin:30px 0;border:2px solid var(--border);border-radius:22px;
+  background:linear-gradient(180deg, rgba(200,252,234,.30), rgba(255,171,0,.16));
+  padding:18px 18px 22px;box-shadow:var(--shadow)}
+.activity header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.activity h2{font-family:"Montserrat Alternates";margin:0 0 4px}
+.objective{color:#2e5c57;font-size:14px;margin-top:4px}
+.progress-wrap{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.level{min-width:220px;font-size:12px;color:#2e5c57;font-weight:800}
+.progress{--val:0%;flex:1;height:18px;background:#fff;border:2px solid var(--border);border-radius:999px;overflow:hidden}
+.progress::after{content:"";display:block;height:100%;width:var(--val);
+  background:linear-gradient(90deg,#a31e0f 0%,var(--harley) 40%,#f59e0b 40%,#fbbf24 55%,#facc15 55%,#fde047 69%,var(--teal) 69%,#86f1dc 96%,var(--teal) 96%,#0f5a52 100%);
+  transition:width .35s ease}
+.pct{min-width:60px;text-align:right;font-size:12px;color:#2e5c57;font-weight:800}
+.prompt{font-size:clamp(18px,2.1vw,22px);font-weight:900;margin:8px 0}
+.center{display:flex;justify-content:center;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:10px}
+.chip{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:12px;border-radius:18px;background:#fff;color:#143f3a;border:2px solid var(--border);cursor:pointer;user-select:none;min-height:92px;transition:transform .08s ease, box-shadow .15s ease}
+.chip:hover{transform:translateY(-2px) scale(1.01);box-shadow:0 10px 22px rgba(28,110,101,.16)}
+.thumb{width:100%;max-width:100%;height:74px;object-fit:cover;border-radius:12px;border:2px solid var(--border);background:#f5faf9}
+
+.export{margin-top:40px}
+.export h3{margin:0 0 8px}
+.export .row{gap:8px}
+button{background:var(--teal);color:#fff;border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+button:hover{filter:brightness(1.05)}
