@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reporteros 1 — U1 L1 • Geografía & Hablar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@700;900&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Avatar -->
+  <div class="avatar-float">
+    <div class="logo"><img src="avatar.jpg" alt="avatar"></div>
+  </div>
+
+  <!-- Header band: title + name/date + voice + ACTFL -->
+  <section class="header-band container">
+    <div class="header-top">
+      <div class="title-row">
+        <h1>Spanish Practice — Geografía & Hablar</h1>
+        <span class="tag">¡Tú puedes!</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col"><div class="input"><label>Nombre</label><input id="firstName" placeholder="Escribe tu nombre"></div></div>
+      <div class="col"><div class="input"><label>Apellido</label><input id="lastName" placeholder="Escribe tu apellido"></div></div>
+      <div class="col"><div class="input"><label>Fecha</label><input id="studentDate" type="date"></div></div>
+    </div>
+
+    <details class="panel" open>
+      <summary>🔊 Voice Controls (Spanish only)</summary>
+      <div class="row">
+        <div class="col">
+          <label class="note">Default tries “Chrome OS español 5”.</label>
+          <select id="voicePick"></select>
+        </div>
+        <div class="col">
+          <label class="note">Rate</label>
+          <input id="ratePick" type="range" min="0.7" max="1.3" step="0.05" value="1">
+        </div>
+        <div class="col">
+          <label class="note">Pitch</label>
+          <input id="pitchPick" type="range" min="0.7" max="1.3" step="0.05" value="1">
+        </div>
+      </div>
+    </details>
+
+    <details class="panel" open>
+      <summary>📚 ACTFL Standards (5 Cs) — linked to activities</summary>
+      <ul class="note">
+        <li><b>Communication</b>: Interpersonal (Act. 5–10), Interpretive (Act. 1), Presentational (Act. 7–8).</li>
+        <li><b>Cultures</b>: Products/Practices/Perspectives via Geografía (Act. 1).</li>
+        <li><b>Connections</b>: Geography & social studies links (Act. 1 neighbors/regions).</li>
+        <li><b>Comparisons</b>: Grammar/usage (Act. 3–4, 6, 9).</li>
+        <li><b>Communities</b>: Research via “investigar” (Act. 1).</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- Activities container -->
+  <main class="container" id="activities">
+    <section id="act1" class="activity"></section>
+    <section id="act2" class="activity"></section>
+    <section id="act3" class="activity"></section>
+    <section id="act4" class="activity"></section>
+    <section id="act5" class="activity"></section>
+    <section id="act6" class="activity"></section>
+    <section id="act7" class="activity"></section>
+    <section id="act8" class="activity"></section>
+    <section id="act9" class="activity"></section>
+    <section id="act10" class="activity"></section>
+  </main>
+
+  <!-- Export footer -->
+  <footer class="container export">
+    <h3>Export your work</h3>
+    <p>Download your results and upload the file to Schoology for credit.</p>
+    <div class="row">
+      <button id="dlJson">Download JSON</button>
+      <button id="copySummary">Copy Summary</button>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/core.js"></script>
+  <script src="js/act1_geografia.js"></script>
+  <script src="js/act2_que_significa.js"></script>
+  <script src="js/act3_pronouns.js"></script>
+  <script src="js/act4_hablar_box6.js"></script>
+  <script src="js/act5_match.js"></script>
+  <script src="js/act6_completa.js"></script>
+  <script src="js/act7_cloze.js"></script>
+  <script src="js/act8_sentence_sort.js"></script>
+  <script src="js/act9_circumlocution.js"></script>
+  <script src="js/act10_listening.js"></script>
+  <script>
+    // Boot everything
+    window.App.init();
+  </script>
+</body>
+</html>
